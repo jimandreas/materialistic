@@ -31,6 +31,9 @@ android {
             shrinkResources true
         }
     }
+    buildFeatures {
+        buildConfig = true
+    }
     lint {
         htmlReport = false
         xmlReport = false
