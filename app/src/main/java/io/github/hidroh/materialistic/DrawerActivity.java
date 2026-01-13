@@ -108,6 +108,7 @@ public abstract class DrawerActivity extends InjectableActivity {
         return mDrawerToggle.onOptionsItemSelected(item)|| super.onOptionsItemSelected(item);
     }
 
+    @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mDrawer)) {

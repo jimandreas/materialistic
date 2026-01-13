@@ -16,6 +16,7 @@
 
 package io.github.hidroh.materialistic;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
@@ -150,6 +151,7 @@ public class ComposeActivity extends InjectableActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
         if (mEditText.length() == 0 || mSending ||

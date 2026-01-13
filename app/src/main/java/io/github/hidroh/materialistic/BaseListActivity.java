@@ -247,6 +247,7 @@ public abstract class BaseListActivity extends DrawerActivity implements MultiPa
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
         }
     }
+    @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
         if (!mIsMultiPane || !mFullscreen) {

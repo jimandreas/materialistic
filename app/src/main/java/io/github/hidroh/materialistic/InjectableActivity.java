@@ -16,6 +16,7 @@
 
 package io.github.hidroh.materialistic;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import dagger.ObjectGraph;
@@ -37,6 +38,7 @@ public abstract class InjectableActivity extends ThemedActivity implements Injec
         mActivityGraph = null;
     }
 
+    @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
         // TODO http://b.android.com/176265

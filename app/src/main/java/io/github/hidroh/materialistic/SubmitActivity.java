@@ -16,6 +16,7 @@
 
 package io.github.hidroh.materialistic;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -151,6 +152,7 @@ public class SubmitActivity extends InjectableActivity {
         outState.putString(STATE_TEXT, mContentEditText.getText().toString());
     }
 
+    @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
         mAlertDialogBuilder

@@ -17,6 +17,7 @@
 package io.github.hidroh.materialistic;
 
 import androidx.lifecycle.Observer;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -250,6 +251,7 @@ public class ItemActivity extends InjectableActivity implements ItemFragment.Ite
         mPreferenceObservable.unsubscribe(this);
     }
 
+    @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
         if (!mFullscreen) {
