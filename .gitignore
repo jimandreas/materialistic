@@ -16,6 +16,12 @@ gen/
 .gradle/
 build/
 
+# claude
+.claude
+
+# kotlin
+.kotlin
+
 # Local configuration file (sdk path, etc)
 local.properties
 

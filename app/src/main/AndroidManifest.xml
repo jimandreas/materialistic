@@ -34,8 +34,6 @@
     <uses-permission android:name="io.github.hidroh.materialistic.permission.SYNC_ITEM" />
     <uses-permission android:name="io.github.hidroh.materialistic.permission.AUTHENTICATE_ACCOUNTS" />
 
-    <uses-sdk tools:overrideLibrary="androidx.browser" />
-
     <application
         android:name=".Application"
         android:supportsRtl="false"
