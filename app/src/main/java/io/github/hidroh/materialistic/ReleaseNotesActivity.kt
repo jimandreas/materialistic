@@ -17,6 +17,7 @@
 package io.github.hidroh.materialistic
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.Window
@@ -49,7 +50,12 @@ class ReleaseNotesActivity : InjectableActivity() {
 
   override fun finish() {
     super.finish()
-    overridePendingTransition(0, R.anim.slide_out_down)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+      overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, R.anim.slide_out_down)
+    } else {
+      @Suppress("DEPRECATION")
+      overridePendingTransition(0, R.anim.slide_out_down)
+    }
   }
 
   override fun isDialogTheme() = true

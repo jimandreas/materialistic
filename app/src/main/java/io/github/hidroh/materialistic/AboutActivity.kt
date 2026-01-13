@@ -16,8 +16,8 @@
 
 package io.github.hidroh.materialistic
 
-import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.annotation.IdRes
 import androidx.appcompat.app.ActionBar
 import android.view.MenuItem
@@ -31,14 +31,9 @@ class AboutActivity : InjectableActivity() {
     supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_HOME or
         ActionBar.DISPLAY_HOME_AS_UP or ActionBar.DISPLAY_SHOW_TITLE
 
-    var versionName = ""
-    var versionCode = 0
-    try {
-      versionName = packageManager.getPackageInfo(packageName, 0).versionName ?: ""
-      versionCode = packageManager.getPackageInfo(packageName, 0).versionCode
-    } catch (e: PackageManager.NameNotFoundException) {
-      // do nothing
-    }
+    val packageInfo = packageManager.getPackageInfo(packageName, 0)
+    val versionName = packageInfo.versionName ?: ""
+    val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
     setTextWithLinks(R.id.text_application_info, getString(R.string.application_info_text, versionName, versionCode))
     setTextWithLinks(R.id.text_developer_info, getString(R.string.developer_info_text))
