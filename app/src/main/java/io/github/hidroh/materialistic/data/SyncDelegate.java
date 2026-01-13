@@ -48,7 +48,6 @@ import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationCompat;
@@ -323,9 +322,7 @@ public class SyncDelegate {
                         .setData(AppUtils.createItemUri(itemId))
                         .putExtra(ItemActivity.EXTRA_CACHE_MODE, ItemManager.MODE_CACHE)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
-                        PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE :
-                        PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private static class SyncProgress {
@@ -431,7 +428,6 @@ public class SyncDelegate {
             this.id = id;
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         Job(PersistableBundle bundle) {
             id = bundle.getString(EXTRA_ID);
             connectionEnabled = bundle.getInt(EXTRA_CONNECTION_ENABLED) == 1;
@@ -450,7 +446,6 @@ public class SyncDelegate {
             notificationEnabled = bundle.getBoolean(EXTRA_NOTIFICATION_ENABLED);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Synthetic PersistableBundle toPersistableBundle() {
             PersistableBundle bundle = new PersistableBundle();
             bundle.putString(EXTRA_ID, id);

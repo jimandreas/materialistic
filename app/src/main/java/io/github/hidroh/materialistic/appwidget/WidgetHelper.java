@@ -27,7 +27,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.widget.RemoteViews;
@@ -36,7 +35,6 @@ import java.util.Locale;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import io.github.hidroh.materialistic.BestActivity;
 import io.github.hidroh.materialistic.ListActivity;
@@ -105,7 +103,6 @@ class WidgetHelper {
         getJobScheduler().cancel(appWidgetId);
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private JobScheduler getJobScheduler() {
         return (JobScheduler) mContext.getSystemService(Context.JOB_SCHEDULER_SERVICE);
     }
@@ -129,9 +126,7 @@ class WidgetHelper {
                         new Intent(mContext, config.destination)
                                 .putExtra(SearchManager.QUERY, config.title) :
                         new Intent(mContext, config.destination),
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
-                                PendingIntent.FLAG_IMMUTABLE :
-                                0));
+                        PendingIntent.FLAG_IMMUTABLE));
     }
 
     private void updateCollection(int appWidgetId, RemoteViews remoteViews, WidgetConfig config) {
@@ -150,9 +145,7 @@ class WidgetHelper {
         remoteViews.setEmptyView(android.R.id.list, R.id.empty);
         remoteViews.setPendingIntentTemplate(android.R.id.list,
                 PendingIntent.getActivity(mContext, 0, new Intent(Intent.ACTION_VIEW),
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
-                                PendingIntent.FLAG_IMMUTABLE :
-                                0));
+                        PendingIntent.FLAG_IMMUTABLE));
     }
 
     private PendingIntent createRefreshPendingIntent(int appWidgetId) {
@@ -160,9 +153,7 @@ class WidgetHelper {
                 new Intent(WidgetProvider.ACTION_REFRESH_WIDGET)
                         .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                         .setPackage(mContext.getPackageName()),
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     static class WidgetConfig {

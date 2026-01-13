@@ -20,7 +20,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -35,7 +34,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Locale;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GestureDetectorCompat;
 import io.github.hidroh.materialistic.AppUtils;
@@ -243,7 +241,6 @@ public class NavFloatingActionButton extends FloatingActionButton implements Vie
     }
 
     @SuppressLint("CommitPrefEdits")
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     @Synthetic void persistPosition() {
         getPreferences()
                 .edit()
@@ -252,7 +249,6 @@ public class NavFloatingActionButton extends FloatingActionButton implements Vie
                 .apply();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void restorePosition() {
         setX(getPreferences().getFloat(mPreferenceX, getX()));
         setY(getPreferences().getFloat(mPreferenceY, getY()));
