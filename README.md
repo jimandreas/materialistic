@@ -5,16 +5,16 @@ Material design [Hacker News] client for Android, uses official [HackerNews/API]
 
 ### Setup
 **Requirements**
-- JDK 11
-- Latest Android SDK tools
-- Latest Android platform tools
+- JDK 17
+- Android SDK with API 35
+- Min SDK: 23 (Android 6.0)
 - AndroidX
 
 **Dependencies**
 - [Official Hacker News API][HackerNews/API], user services (e.g. login/create account/vote/comment) rely on redirect requests to Hacker News website
 - [Algolia Hacker News Search API]
 - [Mercury Web Parser API]
-- [Android Jetpack]: appcompat-v7 / recyclerview-v7 / design / cardview-v7 / preference-v7 / customtabs
+- [Android Jetpack]: appcompat / recyclerview / material / cardview / preference / customtabs / room
 - Square [Retrofit] / [OkHttp] / [AssertJ] / [Dagger] / [LeakCanary]
 - [RxJava] & [RxAndroid]
 - [PDF.js]
@@ -28,6 +28,17 @@ Build with LeakCanary on
     ./gradlew assembleDebug -Pleak
 
 Grab your Mercury Web Parser API key [here][mercury] if you want to connect to Mercury.
+
+### Changes (January 2025)
+Modernization updates by **Claude Opus 4.5** (Anthropic AI assistant):
+
+- Converted Gradle build from Groovy to Kotlin DSL with version catalog
+- Updated dependencies to latest versions (OkHttp 5.x, Retrofit 2.11, Room 2.6, etc.)
+- Raised minSdk from 21 to 23, removing obsolete SDK version checks
+- Removed deprecated `@TargetApi` annotations (replaced by minSdk guarantee)
+- Fixed deprecated API usage (`versionCode`, `overridePendingTransition`)
+- Fixed Kotlin annotation target warnings and unnecessary `inline` modifiers
+- Fixed AGP 9.0 compatibility issues
 
 ### Articles
 - [Supporting multiple themes in your Android app (Part 1)][article-theme1]
@@ -66,7 +77,7 @@ Contributions are always welcome. Please make sure you read [Contributing notes]
 [Play Store Badge]: https://play.google.com/intl/en_us/badges/images/badge_new.png
 [Algolia Hacker News Search API]: https://github.com/algolia/hn-search
 [Mercury Web Parser API]: https://mercury.postlight.com/web-parser/
-[AOSP support library]: https://developer.android.com/tools/support-library/features.html
+[Android Jetpack]: https://developer.android.com/jetpack
 [Retrofit]: https://github.com/square/retrofit
 [OkHttp]: https://github.com/square/okhttp
 [AssertJ]: https://github.com/square/assertj-android
