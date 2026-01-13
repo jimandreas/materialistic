@@ -16,9 +16,7 @@
 
 package io.github.hidroh.materialistic;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import androidx.annotation.WorkerThread;
 import android.text.TextUtils;
 import android.webkit.WebResourceResponse;
@@ -51,7 +49,6 @@ public class AdBlocker {
         return isAdHost(httpUrl != null ? httpUrl.host() : "");
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static WebResourceResponse createEmptyResource() {
         return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
     }

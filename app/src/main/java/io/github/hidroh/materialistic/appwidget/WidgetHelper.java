@@ -16,7 +16,6 @@
 
 package io.github.hidroh.materialistic.appwidget;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -81,7 +80,6 @@ class WidgetHelper {
         mAppWidgetManager.updateAppWidget(appWidgetId, remoteViews);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     void refresh(int appWidgetId) {
         mAppWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, android.R.id.list);
         update(appWidgetId);
@@ -136,7 +134,6 @@ class WidgetHelper {
                                 0));
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void updateCollection(int appWidgetId, RemoteViews remoteViews, WidgetConfig config) {
         remoteViews.setTextViewText(R.id.subtitle,
                 DateUtils.formatDateTime(mContext, System.currentTimeMillis(),

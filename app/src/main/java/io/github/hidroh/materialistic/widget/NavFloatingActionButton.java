@@ -17,7 +17,6 @@
 package io.github.hidroh.materialistic.widget;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -186,7 +185,6 @@ public class NavFloatingActionButton extends FloatingActionButton implements Vie
         Toast.makeText(getContext(), R.string.hint_drag, Toast.LENGTH_SHORT).show();
         //noinspection Convert2Lambda
         super.setOnTouchListener(new OnTouchListener() {
-            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getAction()) {

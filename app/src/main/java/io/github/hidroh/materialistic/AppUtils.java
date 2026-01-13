@@ -19,7 +19,6 @@ package io.github.hidroh.materialistic;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
@@ -364,7 +363,6 @@ public class AppUtils {
     }
 
     @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void openPlayStore(Context context) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(PLAY_STORE_URL));
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
