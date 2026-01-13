@@ -17,10 +17,10 @@ gen/
 build/
 
 # claude
-.claude
+.claude/
 
 # kotlin
-.kotlin
+.kotlin/
 
 # Local configuration file (sdk path, etc)
 local.properties
