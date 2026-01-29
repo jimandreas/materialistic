@@ -1,3 +1,7 @@
+import java.io.FileInputStream
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -20,7 +24,7 @@ android {
         buildConfigField("String", "MERCURY_TOKEN", "\"\"")
 
         proguardFiles(
-            getDefaultProguardFile("proguard-android.txt"),
+            getDefaultProguardFile("proguard-android-optimize.txt"),
             "proguard-rules.pro",
             "proguard-square.pro",
             "proguard-support.pro",
@@ -42,9 +46,20 @@ android {
             isShrinkResources = true
         }
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
     buildFeatures {
         buildConfig = true
+    }
+
+    // Universal APK/Bundle configuration - includes all resources
+    bundle {
+        language { enableSplit = false }
+        density { enableSplit = false }
+        abi { enableSplit = false }
     }
 
     lint {
@@ -62,8 +77,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        jvmToolchain(17)
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
