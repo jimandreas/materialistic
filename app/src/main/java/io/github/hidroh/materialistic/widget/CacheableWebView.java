@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.os.StrictMode;
 import androidx.annotation.CallSuper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -36,6 +37,7 @@ public class CacheableWebView extends WebView {
     private static final String CACHE_PREFIX = "webarchive-";
     private static final String CACHE_EXTENSION = ".mht";
     private ArchiveClient mArchiveClient = new ArchiveClient();
+    private String mCacheDirPath;
 
     public CacheableWebView(Context context) {
         this(context, null);
@@ -120,11 +122,25 @@ public class CacheableWebView extends WebView {
             return url;
         }
         File cacheFile = new File(mArchiveClient.cacheFileName);
-        return cacheFile.exists() ? Uri.fromFile(cacheFile).toString() : url;
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        try {
+            return cacheFile.exists() ? Uri.fromFile(cacheFile).toString() : url;
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
     }
 
     private String generateCacheFilename(String url) {
-        return getContext().getApplicationContext().getCacheDir().getAbsolutePath() +
+        if (mCacheDirPath == null) {
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            try {
+                mCacheDirPath = getContext().getApplicationContext()
+                        .getCacheDir().getAbsolutePath();
+            } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
+        }
+        return mCacheDirPath +
                 File.separator +
                 CACHE_PREFIX +
                 url.hashCode() +

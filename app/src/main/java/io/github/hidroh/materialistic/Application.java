@@ -46,8 +46,18 @@ public class Application extends android.app.Application implements Injectable {
                     .detectAll()
                     .penaltyFlashScreen()
                     .build());
+            // Use explicit detections instead of detectAll() to avoid
+            // false positives from OkHttp 5.x / okio's internal NIO
+            // DirectoryStream usage in DiskLruCache (LeakedClosableViolation
+            // for UnixSecureDirectoryStream).
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectAll()
+                    .detectLeakedSqlLiteObjects()
+                    .detectActivityLeaks()
+                    .detectLeakedRegistrationObjects()
+                    .detectFileUriExposure()
+                    .detectCleartextNetwork()
+                    .detectContentUriWithoutPermission()
+                    .detectUntaggedSockets()
                     .penaltyLog()
                     .build());
         }

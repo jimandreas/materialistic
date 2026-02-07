@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.StrictMode;
 import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -250,8 +251,13 @@ public class NavFloatingActionButton extends FloatingActionButton implements Vie
     }
 
     private void restorePosition() {
-        setX(getPreferences().getFloat(mPreferenceX, getX()));
-        setY(getPreferences().getFloat(mPreferenceY, getY()));
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        try {
+            setX(getPreferences().getFloat(mPreferenceX, getX()));
+            setY(getPreferences().getFloat(mPreferenceY, getY()));
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
     }
 
     private DisplayMetrics getDisplayMetrics() {
