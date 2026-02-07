@@ -20,19 +20,27 @@ import okio.Okio;
 
 public class FileDownloader {
     private Call.Factory mCallFactory;
-    private final String mCacheDir;
+    private final Context mContext;
+    private volatile String mCacheDir;
     @Synthetic final Handler mMainHandler;
 
     @Inject
     public FileDownloader(Context context, Call.Factory callFactory) {
-        mCacheDir = context.getCacheDir().getPath(); // don't need to keep a reference to context after this
+        mContext = context.getApplicationContext();
         mCallFactory = callFactory;
         mMainHandler = new Handler(Looper.getMainLooper());
     }
 
+    private String getCacheDir() {
+        if (mCacheDir == null) {
+            mCacheDir = mContext.getCacheDir().getPath();
+        }
+        return mCacheDir;
+    }
+
     @WorkerThread
     public void downloadFile(String url, String mimeType, FileDownloaderCallback callback) {
-        File outputFile = new File(mCacheDir, new File(url).getName());
+        File outputFile = new File(getCacheDir(), new File(url).getName());
         if (outputFile.exists()) {
             mMainHandler.post(() -> callback.onSuccess(outputFile.getPath()));
             return;
