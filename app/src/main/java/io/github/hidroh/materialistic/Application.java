@@ -50,12 +50,14 @@ public class Application extends android.app.Application implements Injectable {
             // false positives from OkHttp 5.x / okio's internal NIO
             // DirectoryStream usage in DiskLruCache (LeakedClosableViolation
             // for UnixSecureDirectoryStream).
+            // detectCleartextNetwork() is omitted because it produces false
+            // positives for QUIC (HTTP/3) traffic — encrypted UDP to port 443
+            // is misidentified as cleartext.
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
                     .detectLeakedSqlLiteObjects()
                     .detectActivityLeaks()
                     .detectLeakedRegistrationObjects()
                     .detectFileUriExposure()
-                    .detectCleartextNetwork()
                     .detectContentUriWithoutPermission()
                     .detectUntaggedSockets()
                     .penaltyLog()
