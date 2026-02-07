@@ -22,83 +22,89 @@ Materialistic is a Material Design Hacker News client for Android. It uses the o
 ./gradlew lint
 ```
 
+There is no test suite in the project — no unit tests or instrumentation tests exist.
+
 ## Requirements
 
 - JDK 17 (compilation target)
-- Android SDK with API 35
-- Min SDK: 21 (Android 5.0)
+- Android SDK with compileSdk/targetSdk 36
+- Min SDK: 23 (Android 6.0)
+- Gradle 9.3.0 (via wrapper)
+
+## Build System
+
+Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`). Key dependency versions: AGP 9.0.0, Kotlin 2.3.0, Retrofit 3.0.0, OkHttp 5.x, Room 2.8.x, Dagger 1.2.5, RxJava 1.3.8. Uses KAPT for annotation processing (Dagger 1 and Room).
+
+Lint configuration is in `lint.xml` at the project root. Lint is strict (`abortOnError = true`) — builds fail on warnings or errors.
+
+ProGuard is split across four files (`proguard-rules.pro`, `proguard-square.pro`, `proguard-support.pro`, `proguard-rx.pro`). Obfuscation is disabled (`-dontobfuscate`); only shrinking is enabled for release builds.
+
+Resource locale filtering: only `en`, `zh-rCN`, `es` are included. Bundle splits are all disabled (universal APK).
 
 ## Architecture
 
 ### Dependency Injection (Dagger 1.x)
 
-The app uses Square's Dagger 1.2.5 (not Dagger 2). Key concepts:
+The app uses Square's Dagger 1.2.5 (not Dagger 2/Hilt).
 
 - `Injectable` interface provides `inject()` and `getApplicationGraph()` methods
-- `Application` class creates the root `ObjectGraph` in `attachBaseContext()`
-- Activities extend from `InjectableActivity` which handles injection in `onCreate()`
-- Activity-level graphs use `ObjectGraph.plus(new ActivityModule(this))`
+- `Application` class creates the root `ObjectGraph` in `attachBaseContext()` (not `onCreate()` — this is intentional for early initialization)
+- Activities extend `InjectableActivity` which creates a child graph via `ObjectGraph.plus(new ActivityModule(this), new UiModule())`
+- Fragments do NOT have an injectable base class. Instead, `BaseFragment.onActivityCreated()` casts the parent activity to `Injectable` and calls `inject(this)`. Fragments must be listed in `ActivityModule` or `UiModule`'s `injects` array.
 
 Modules:
-- `DataModule` - API clients, database, managers. Uses `@Named` for different ItemManager implementations (`HN`, `ALGOLIA`, `POPULAR`)
-- `NetworkModule` - OkHttp configuration with caching interceptors
-- `ActivityModule` - Activity-scoped dependencies
-- `UiModule` - UI components
+- `DataModule` — API clients, database, managers. Uses `@Named` for three `ItemManager` implementations: `HN`, `ALGOLIA`, `POPULAR`
+- `NetworkModule` — OkHttp with per-host cache policies (HN/Algolia: 30 min, Readability: 24 hours) and offline `FORCE_CACHE` support
+- `ActivityModule` — Activity-scoped dependencies; declares injectable targets in `injects = {}`
+- `UiModule` — UI components (fragments, widgets)
 
 ### Data Layer
 
-**API Clients** (Retrofit 2.x + RxJava 1.x):
-- `HackerNewsClient` - Official HN API
-- `AlgoliaClient` - Search functionality
-- `ReadabilityClient` - Article parsing via Mercury
-- `UserServicesClient` - Authentication
+**API Clients** (Retrofit 3.x + RxJava 1.x):
+- `HackerNewsClient` — Official HN API
+- `AlgoliaClient` — Search functionality
+- `ReadabilityClient` — Article parsing via Mercury
+- `UserServicesClient` — Authentication (relies on redirect requests to HN website)
 
 **Database** (Room):
-- `MaterialisticDatabase` with tables: `SavedStory`, `ReadStory`, `Readable`
-- DAOs: `SavedStoriesDao`, `ReadStoriesDao`, `ReadableDao`
+- `MaterialisticDatabase` (version 4) with tables: `SavedStory`, `ReadStory`, `Readable`
+- Has a manual SQL migration (3→4) that renames legacy tables (`favorite`→`saved`, `viewed`→`read`, `readability`→`readable`)
 
 **Caching**:
 - `LocalCache` interface with Kotlin implementation in `data/android/Cache.kt`
-- OkHttp interceptor-based HTTP caching with offline support
+- OkHttp interceptor-based HTTP caching (20 MB disk cache) with per-host cache control via `ConnectionAwareInterceptor`
 
 ### UI Layer
 
-Base classes hierarchy:
-- `ThemedActivity` - Theme switching support
-- `InjectableActivity extends ThemedActivity` - Adds DI
-- `BaseListActivity extends InjectableActivity` - List screens with search/tabs/FAB
+Activity inheritance chain:
+```
+ThemedActivity              — Theme switching (applied BEFORE super.onCreate())
+  └─ InjectableActivity     — Activity-scoped ObjectGraph
+       └─ DrawerActivity    — Navigation drawer
+            └─ BaseListActivity — List screens with search/tabs/FAB, multi-pane support
+```
 
-Multi-pane layouts supported for tablets (landscape configurations).
+**Multi-pane**: Detected via `R.bool.multi_pane` resource boolean. In multi-pane mode (tablets/landscape), list is shown on the left with a ViewPager for item details on the right. Single-pane navigates to `ItemActivity`.
+
+**Theme application**: `Preferences.Theme` applies the theme in `onCreate()` **before** `super.onCreate()`. Theme changes trigger a full activity restart via `AppUtils.restart()`.
 
 ### Reactive Patterns
 
-Uses RxJava 1.x with schedulers injected via `@Named(IO_THREAD)` and `@Named(MAIN_THREAD)`.
+Uses RxJava 1.x (not 2.x) with schedulers injected via `@Named(IO_THREAD)` and `@Named(MAIN_THREAD)`.
+
+### AndroidManifest Highlights
+
+- Custom signature-level permissions for sync and account authentication
+- Deep linking: `news.ycombinator.com/item`, `news.ycombinator.com/user`, and `materialistic://` custom scheme
+- Sync adapter runs in a separate `:sync` process
 
 ## Code Style
 
 - Follow [Android code style](https://source.android.com/source/code-style.html)
-- Lint is strict (`abortOnError = true`) - builds fail on warnings/errors
 - Mix of Java and Kotlin; newer files tend to be Kotlin
-- Custom annotations: `@PublicApi`, `@Synthetic`
-
-## Key Directories
-
-```
-app/src/main/java/io/github/hidroh/materialistic/
-├── accounts/       # HN account authentication
-├── annotation/     # Custom annotations
-├── appwidget/      # Home screen widget
-├── data/           # API clients, database, managers
-│   └── android/    # Android-specific implementations (Cache.kt)
-├── ktx/            # Kotlin extensions
-├── preference/     # Settings/preference screens
-├── widget/         # Custom UI widgets
-├── Application.java
-├── *Activity.java  # Screen implementations
-├── *Fragment.java  # Fragment implementations
-└── *Module.java    # Dagger modules
-```
+- `@PublicApi` — Marks APIs that should be discoverable (SOURCE retention)
+- `@Synthetic` — Marks fields/methods with relaxed visibility to avoid synthetic accessor generation
 
 ## API Keys
 
-Optional API key for Mercury Web Parser can be configured via `MERCURY_TOKEN` build config field.
+Optional build config fields `MERCURY_TOKEN` and `GITHUB_TOKEN` (both empty by default).
