@@ -322,6 +322,7 @@ class FavoriteManager @Inject constructor(
     fun load() {
       Observable.defer { Observable.just(filter) }
           .map { query(it) }
+          .doOnNext { it.count } // Force cursor window fill on IO thread
           .subscribeOn(ioScheduler)
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe {
