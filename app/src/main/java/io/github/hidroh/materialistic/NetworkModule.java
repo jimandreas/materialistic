@@ -57,51 +57,84 @@ class NetworkModule {
 
     @Provides @Singleton
     public Call.Factory provideCallFactory(Context context) {
-        return new OkHttpClient.Builder()
-                .socketFactory(new SocketFactory() {
-                    private SocketFactory mDefaultFactory = SocketFactory.getDefault();
+        // Return a lazy Call.Factory to avoid building OkHttpClient on the main
+        // thread during Dagger injection. OkHttpClient.build() triggers SSL
+        // context initialization which is flagged by StrictMode as a slow call.
+        // The actual client is built on first use (a background IO thread).
+        return new LazyCallFactory(context.getApplicationContext());
+    }
 
-                    @Override
-                    public Socket createSocket() throws IOException {
-                        Socket socket = mDefaultFactory.createSocket();
-                        TrafficStats.setThreadStatsTag(1);
-                        return socket;
-                    }
+    static class LazyCallFactory implements Call.Factory {
+        private final Context mContext;
+        private volatile OkHttpClient mClient;
 
-                    @Override
-                    public Socket createSocket(String host, int port) throws IOException {
-                        Socket socket = mDefaultFactory.createSocket(host, port);
-                        TrafficStats.setThreadStatsTag(1);
-                        return socket;
-                    }
+        LazyCallFactory(Context context) {
+            mContext = context;
+        }
 
-                    @Override
-                    public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
-                        Socket socket = mDefaultFactory.createSocket(host, port, localHost, localPort);
-                        TrafficStats.setThreadStatsTag(1);
-                        return socket;
+        private OkHttpClient getClient() {
+            if (mClient == null) {
+                synchronized (this) {
+                    if (mClient == null) {
+                        mClient = buildClient();
                     }
+                }
+            }
+            return mClient;
+        }
 
-                    @Override
-                    public Socket createSocket(InetAddress host, int port) throws IOException {
-                        Socket socket = mDefaultFactory.createSocket(host, port);
-                        TrafficStats.setThreadStatsTag(1);
-                        return socket;
-                    }
+        private OkHttpClient buildClient() {
+            return new OkHttpClient.Builder()
+                    .socketFactory(new SocketFactory() {
+                        private SocketFactory mDefaultFactory = SocketFactory.getDefault();
 
-                    @Override
-                    public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
-                        Socket socket = mDefaultFactory.createSocket(address, port, localAddress, localPort);
-                        TrafficStats.setThreadStatsTag(1);
-                        return socket;
-                    }
-                })
-                .cache(new Cache(context.getApplicationContext().getCacheDir(), CACHE_SIZE))
-                .addNetworkInterceptor(new CacheOverrideNetworkInterceptor())
-                .addInterceptor(new ConnectionAwareInterceptor(context))
-                .addInterceptor(new LoggingInterceptor())
-                .followRedirects(false)
-                .build();
+                        @Override
+                        public Socket createSocket() throws IOException {
+                            Socket socket = mDefaultFactory.createSocket();
+                            TrafficStats.setThreadStatsTag(1);
+                            return socket;
+                        }
+
+                        @Override
+                        public Socket createSocket(String host, int port) throws IOException {
+                            Socket socket = mDefaultFactory.createSocket(host, port);
+                            TrafficStats.setThreadStatsTag(1);
+                            return socket;
+                        }
+
+                        @Override
+                        public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+                            Socket socket = mDefaultFactory.createSocket(host, port, localHost, localPort);
+                            TrafficStats.setThreadStatsTag(1);
+                            return socket;
+                        }
+
+                        @Override
+                        public Socket createSocket(InetAddress host, int port) throws IOException {
+                            Socket socket = mDefaultFactory.createSocket(host, port);
+                            TrafficStats.setThreadStatsTag(1);
+                            return socket;
+                        }
+
+                        @Override
+                        public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+                            Socket socket = mDefaultFactory.createSocket(address, port, localAddress, localPort);
+                            TrafficStats.setThreadStatsTag(1);
+                            return socket;
+                        }
+                    })
+                    .cache(new Cache(mContext.getCacheDir(), CACHE_SIZE))
+                    .addNetworkInterceptor(new CacheOverrideNetworkInterceptor())
+                    .addInterceptor(new ConnectionAwareInterceptor(mContext))
+                    .addInterceptor(new LoggingInterceptor())
+                    .followRedirects(false)
+                    .build();
+        }
+
+        @Override
+        public Call newCall(Request request) {
+            return getClient().newCall(request);
+        }
     }
 
     @Provides @Singleton

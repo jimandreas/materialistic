@@ -21,7 +21,6 @@ import android.content.SharedPreferences;
 import androidx.annotation.IntDef;
 import com.google.android.material.appbar.AppBarLayout;
 import androidx.core.widget.NestedScrollView;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
@@ -71,9 +70,9 @@ public class KeyDelegate {
      */
     public void attach(Activity activity) {
         mPreferenceKey = activity.getString(R.string.pref_volume);
-        mEnabled = PreferenceManager.getDefaultSharedPreferences(activity)
+        mEnabled = Preferences.getDefaultSharedPreferences(activity)
                 .getBoolean(mPreferenceKey, false);
-        PreferenceManager.getDefaultSharedPreferences(activity)
+        Preferences.getDefaultSharedPreferences(activity)
                 .registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
@@ -84,7 +83,7 @@ public class KeyDelegate {
      * @see #attach(Activity)
      */
     public void detach(Activity activity) {
-        PreferenceManager.getDefaultSharedPreferences(activity)
+        Preferences.getDefaultSharedPreferences(activity)
                 .unregisterOnSharedPreferenceChangeListener(mPreferenceListener);
         mScrollable = null;
         mAppBarLayout = null;

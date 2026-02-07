@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.StrictMode;
 import android.text.TextUtils;
 
 import java.util.HashMap;
@@ -49,6 +50,19 @@ public class Preferences {
     private static final String DRAFT_PREFIX = "draft_%1$s";
     private static final String PREFERENCES_DRAFT = "_drafts";
     @VisibleForTesting static Boolean sReleaseNotesSeen = null;
+
+    // Wraps PreferenceManager.getDefaultSharedPreferences to avoid StrictMode
+    // DiskReadViolation. SharedPreferences path resolution triggers File.exists()
+    // via getDataDir(), which is unavoidable on the main thread since values are
+    // needed synchronously (e.g. theme must be applied before super.onCreate()).
+    static SharedPreferences getDefaultSharedPreferences(Context context) {
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        try {
+            return PreferenceManager.getDefaultSharedPreferences(context);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
+    }
 
     public enum SwipeAction {
         None,
@@ -95,7 +109,7 @@ public class Preferences {
      * TODO remove once all users migrated
      */
     public static void migrate(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
         for (BoolToStringPref pref : PREF_MIGRATION) {
             if (pref.isChanged(context, sp)) {
@@ -305,7 +319,7 @@ public class Preferences {
     }
 
     public static void reset(Context context) {
-        PreferenceManager.getDefaultSharedPreferences(context)
+        getDefaultSharedPreferences(context)
                 .edit()
                 .clear()
                 .apply();
@@ -321,12 +335,12 @@ public class Preferences {
 
     @Synthetic
     static boolean get(Context context, @StringRes int key, boolean defaultValue) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
+        return getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(key), defaultValue);
     }
 
     private static int getInt(Context context, @StringRes int key, int defaultValue) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
+        return getDefaultSharedPreferences(context)
                 .getInt(context.getString(key), defaultValue);
     }
 
@@ -345,17 +359,17 @@ public class Preferences {
     }
 
     private static String get(Context context, @StringRes int key, @StringRes int defaultValue) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
+        return getDefaultSharedPreferences(context)
                 .getString(context.getString(key), context.getString(defaultValue));
     }
 
     private static String get(Context context, String key, String defaultValue) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
+        return getDefaultSharedPreferences(context)
                 .getString(key, defaultValue);
     }
 
     private static void setInt(Context context, @StringRes int key, int value) {
-        PreferenceManager.getDefaultSharedPreferences(context)
+        getDefaultSharedPreferences(context)
                 .edit()
                 .putInt(context.getString(key), value)
                 .apply();
@@ -366,7 +380,7 @@ public class Preferences {
     }
 
     private static void set(Context context, String key, String value) {
-        PreferenceManager.getDefaultSharedPreferences(context)
+        getDefaultSharedPreferences(context)
                 .edit()
                 .putString(key, value)
                 .apply();
@@ -374,7 +388,7 @@ public class Preferences {
 
     @Synthetic
     static void set(Context context, @StringRes int key, boolean value) {
-        PreferenceManager.getDefaultSharedPreferences(context)
+        getDefaultSharedPreferences(context)
                 .edit()
                 .putBoolean(context.getString(key), value)
                 .apply();
@@ -534,12 +548,12 @@ public class Preferences {
             ensureContextKeys(context);
             setSubscription(context, preferenceKeys);
             mObserver = observer;
-            PreferenceManager.getDefaultSharedPreferences(context)
+            getDefaultSharedPreferences(context)
                     .registerOnSharedPreferenceChangeListener(mListener);
         }
 
         public void unsubscribe(Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context)
+            getDefaultSharedPreferences(context)
                     .unregisterOnSharedPreferenceChangeListener(mListener);
         }
 

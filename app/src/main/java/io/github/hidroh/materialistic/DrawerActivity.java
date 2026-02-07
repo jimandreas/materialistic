@@ -28,7 +28,6 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -85,7 +84,7 @@ public abstract class DrawerActivity extends InjectableActivity {
             }
         };
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-        PreferenceManager.getDefaultSharedPreferences(this)
+        Preferences.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(mLoginListener);
         setUpDrawer();
         setUsername();
@@ -124,7 +123,7 @@ public abstract class DrawerActivity extends InjectableActivity {
     protected void onDestroy() {
         super.onDestroy();
         mDrawerLayout.removeDrawerListener(mDrawerToggle);
-        PreferenceManager.getDefaultSharedPreferences(this)
+        Preferences.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(mLoginListener);
     }
 
