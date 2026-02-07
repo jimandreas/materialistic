@@ -99,6 +99,7 @@ class FavoriteManager @Inject constructor(
 
   override fun detach() {
     if (cursor != null) {
+      cursor?.close()
       cursor = null
     }
     loader = null
@@ -326,6 +327,7 @@ class FavoriteManager @Inject constructor(
           .subscribeOn(ioScheduler)
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe {
+            cursor?.close()
             cursor = if (it == null) null else Cursor(it)
             observer.onChanged()
           }
