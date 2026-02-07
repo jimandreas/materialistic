@@ -77,7 +77,7 @@ public class WebView extends android.webkit.WebView {
             super.onPageStarted(view, url, favicon);
             view.pageUp(true);
             WebView webView = (WebView) view;
-            if (AppUtils.urlEquals(url, webView.mPendingUrl)) {
+            if (!TextUtils.equals(url, BLANK) && !TextUtils.isEmpty(webView.mPendingUrl)) {
                 view.setVisibility(VISIBLE);
             }
             if (mClient != null) {
@@ -96,8 +96,7 @@ public class WebView extends android.webkit.WebView {
                 } else {
                     view.loadUrl(webView.mPendingUrl);
                 }
-            } else if (!TextUtils.isEmpty(webView.mPendingUrl) &&
-                    TextUtils.equals(url, webView.mPendingUrl)) { // reload done, clear history
+            } else if (!TextUtils.isEmpty(webView.mPendingUrl)) { // reload done, clear history
                 webView.mPendingUrl = null;
                 webView.mPendingHtml = null;
                 view.clearHistory();

@@ -24,6 +24,7 @@ import android.os.StrictMode;
 import androidx.annotation.CallSuper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
@@ -88,6 +89,7 @@ public class CacheableWebView extends WebView {
     private void init() {
         enableCache();
         setLoadSettings();
+        CookieManager.getInstance().setAcceptThirdPartyCookies(this, true);
         setWebViewClient(new WebViewClient());
         setWebChromeClient(mArchiveClient);
     }
@@ -110,6 +112,8 @@ public class CacheableWebView extends WebView {
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
     }
 
     private String getCacheableUrl(String url) {
