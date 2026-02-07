@@ -6,7 +6,7 @@ Material design [Hacker News] client for Android, uses official [HackerNews/API]
 ### Setup
 **Requirements**
 - JDK 17
-- Android SDK with API 35
+- Android SDK with API 36
 - Min SDK: 23 (Android 6.0)
 - AndroidX
 
@@ -28,6 +28,14 @@ Build with LeakCanary on
     ./gradlew assembleDebug -Pleak
 
 Grab your Mercury Web Parser API key [here][mercury] if you want to connect to Mercury.
+
+### Changes (February 2025)
+Bug fixes by **Claude Opus 4.6** (Anthropic AI assistant):
+
+- Fixed WebView failing to display pages that redirect (YouTube, Blogspot, etc.) — the WebView stayed permanently invisible after URL redirects because `HistoryWebViewClient` required an exact URL match to set visibility
+- Enabled DOM storage, third-party cookies, and mixed content compatibility mode for modern website support
+- Fixed StrictMode violations in CacheableWebView, NavFloatingActionButton, FavoriteManager, and FileDownloader
+- Removed `detectCleartextNetwork()` to fix QUIC false positives
 
 ### Changes (January 2025)
 Modernization updates by **Claude Opus 4.5** (Anthropic AI assistant):

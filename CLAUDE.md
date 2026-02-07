@@ -88,6 +88,24 @@ ThemedActivity              — Theme switching (applied BEFORE super.onCreate()
 
 **Theme application**: `Preferences.Theme` applies the theme in `onCreate()` **before** `super.onCreate()`. Theme changes trigger a full activity restart via `AppUtils.restart()`.
 
+### WebView Layer
+
+The app uses a custom WebView hierarchy for displaying article content:
+
+```
+android.webkit.WebView
+  └─ WebView (widget)        — History management, pending URL reload via about:blank
+       └─ CacheableWebView   — Web archive (.mht) caching, offline support
+```
+
+**Key classes:**
+- `WebView` (`widget/WebView.java`) — Wraps Android WebView with `HistoryWebViewClient` that manages reload sequences (load `about:blank` → load target URL → clear history). Visibility is set when any non-blank page starts loading while a pending URL exists (handles redirects).
+- `CacheableWebView` (`widget/CacheableWebView.java`) — Adds `.mht` web archive caching. Configures WebView settings: JavaScript, DOM storage, third-party cookies, mixed content mode. Uses `LOAD_CACHE_ELSE_NETWORK` when online, `LOAD_CACHE_ONLY` when offline.
+- `AdBlockWebViewClient` (`widget/AdBlockWebViewClient.java`) — Intercepts requests via `shouldInterceptRequest()` and blocks ad hosts loaded from `assets/pgl.yoyo.org.txt`. Uses recursive subdomain matching.
+- `WebFragment` — Main article viewer. Uses `CacheableWebView` with `AdBlockWebViewClient`. Supports readability mode toggle, PDF viewing via JavaScript bridge, fullscreen mode, and find-in-page.
+
+**Important:** `HistoryWebViewClient` only delegates `onPageStarted`, `onPageFinished`, and `shouldInterceptRequest` to the wrapped client. Other `WebViewClient` callbacks (e.g. `shouldOverrideUrlLoading`) are NOT delegated.
+
 ### Reactive Patterns
 
 Uses RxJava 1.x (not 2.x) with schedulers injected via `@Named(IO_THREAD)` and `@Named(MAIN_THREAD)`.
