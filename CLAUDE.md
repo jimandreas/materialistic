@@ -29,11 +29,24 @@ There is no test suite in the project — no unit tests or instrumentation tests
 - JDK 17 (compilation target)
 - Android SDK with compileSdk/targetSdk 36
 - Min SDK: 23 (Android 6.0)
-- Gradle 9.3.0 (via wrapper)
+- Gradle 9.3.1 (via wrapper)
 
 ## Build System
 
-Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`). Key dependency versions: AGP 9.0.0, Kotlin 2.3.0, Retrofit 3.0.0, OkHttp 5.x, Room 2.8.x, Dagger 1.2.5, RxJava 1.3.8. Uses KAPT for annotation processing (Dagger 1 and Room).
+Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`). Key dependency versions: AGP 9.0.1, Kotlin 2.3.10, Retrofit 3.0.0, OkHttp 5.x, Room 2.8.x, Dagger 1.2.5, RxJava 1.3.8. Uses KAPT for annotation processing (Dagger 1 and Room).
+
+## Build Warnings
+
+The build currently emits four deprecation warnings that cannot be resolved without a major refactor:
+
+- `android.builtInKotlin=false` is deprecated (AGP default is now `true`)
+- `android.newDsl=false` is deprecated (AGP default is now `true`)
+- `org.jetbrains.kotlin.android` plugin is deprecated in AGP 9.0+
+- `BaseAppModuleExtension` `android {}` accessor is deprecated, replaced by `ApplicationExtension`
+
+**Root cause:** AGP 9.0 built-in Kotlin is incompatible with the `kotlin.kapt` plugin. KAPT cannot be removed because Dagger 1.2.5 has no KSP migration path. Resolving these warnings requires replacing Dagger 1.x with Dagger 2 / Hilt and migrating Room annotation processing from KAPT to KSP.
+
+All other AGP deprecation warnings have been resolved (removed `android.usesSdkInManifest.disallowed`, `android.sdk.defaultTargetSdkToCompileSdkIfUnset`, `android.enableAppCompileTimeRClass`, `android.defaults.buildfeatures.resvalues`, `android.r8.optimizedResourceShrinking`; suppressed `excludeLibraryComponentsFromConstraints` sync warnings).
 
 Lint configuration is in `lint.xml` at the project root. Lint is strict (`abortOnError = true`) — builds fail on warnings or errors.
 
