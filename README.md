@@ -29,6 +29,14 @@ Build with LeakCanary on
 
 Grab your Mercury Web Parser API key [here][mercury] if you want to connect to Mercury.
 
+### Changes (February 2026)
+Build modernization by **Claude Sonnet 4.6** (Anthropic AI assistant):
+
+- Removed 5 deprecated `android.*` Gradle properties whose defaults changed in AGP 9.0 (`usesSdkInManifest.disallowed`, `sdk.defaultTargetSdkToCompileSdkIfUnset`, `enableAppCompileTimeRClass`, `defaults.buildfeatures.resvalues`, `r8.optimizedResourceShrinking`)
+- Suppressed `excludeLibraryComponentsFromConstraints` sync warnings
+- Bumped AGP 9.0.0 → 9.0.1, Kotlin 2.3.0 → 2.3.10, Gradle 9.3.0 → 9.3.1
+- Remaining 4 deprecation warnings (`builtInKotlin`, `newDsl`, `kotlin.android` plugin, `BaseAppModuleExtension`) require a Dagger 1→2/Hilt migration before they can be resolved
+
 ### Changes (February 2025)
 Bug fixes by **Claude Opus 4.6** (Anthropic AI assistant):
 
