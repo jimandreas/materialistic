@@ -101,7 +101,6 @@ dependencies {
     // Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.lifecycle.compiler)
 
     // Dagger 1.x
     implementation(libs.dagger)
