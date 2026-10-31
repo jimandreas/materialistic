@@ -12,17 +12,19 @@ Materialistic is a Material Design Hacker News client for Android. It uses the o
 # Debug build
 ./gradlew assembleDebug
 
-# Debug build with LeakCanary memory leak detection
-./gradlew assembleDebug -Pleak
-
 # Release build (requires signing configuration)
 ./gradlew assembleRelease
 
-# Run lint checks
+# Run lint checks (all variants)
 ./gradlew lint
+
+# Run lint on the debug variant only (faster)
+./gradlew lintDebug
 ```
 
-There is no test suite in the project — no unit tests or instrumentation tests exist.
+There is no test suite in the project — no unit tests or instrumentation tests exist (`app/src` has only `main`, `debug`, `release`). The leftover `kaptTest(...)` dependencies in `app/build.gradle.kts` are vestigial.
+
+LeakCanary is not a dependency (the old `-Pleak` build flag was removed). Debug builds rely on `StrictMode` (set up in `Application.java`) for leak detection instead.
 
 ## Requirements
 
@@ -122,6 +124,8 @@ android.webkit.WebView
 ### Reactive Patterns
 
 Uses RxJava 1.x (not 2.x) with schedulers injected via `@Named(IO_THREAD)` and `@Named(MAIN_THREAD)`.
+
+Jetpack ViewModel/LiveData is used in a few places alongside Rx (e.g. `StoryListViewModel` backing `ListFragment`, a `MutableLiveData<Uri>` change notifier in `MaterialisticDatabase`).
 
 ### AndroidManifest Highlights
 

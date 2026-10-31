@@ -15,17 +15,13 @@ Material design [Hacker News] client for Android, uses official [HackerNews/API]
 - [Algolia Hacker News Search API]
 - [Mercury Web Parser API]
 - [Android Jetpack]: appcompat / recyclerview / material / cardview / preference / customtabs / room
-- Square [Retrofit] / [OkHttp] / [AssertJ] / [Dagger] / [LeakCanary]
+- Square [Retrofit] / [OkHttp] / [Dagger]
 - [RxJava] & [RxAndroid]
 - [PDF.js]
 
 **Build**
 
     ./gradlew assembleDebug
-
-Build with LeakCanary on
-
-    ./gradlew assembleDebug -Pleak
 
 Grab your Mercury Web Parser API key [here][mercury] if you want to connect to Mercury.
 
@@ -96,9 +92,7 @@ Contributions are always welcome. Please make sure you read [Contributing notes]
 [Android Jetpack]: https://developer.android.com/jetpack
 [Retrofit]: https://github.com/square/retrofit
 [OkHttp]: https://github.com/square/okhttp
-[AssertJ]: https://github.com/square/assertj-android
 [Dagger]: https://github.com/square/dagger
-[LeakCanary]: https://github.com/square/leakcanary
 [RxJava]: https://github.com/ReactiveX/RxJava
 [RxAndroid]: https://github.com/ReactiveX/RxAndroid
 [mercury]: https://mercury.postlight.com/web-parser/
