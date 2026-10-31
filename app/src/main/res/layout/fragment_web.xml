@@ -22,54 +22,45 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/nested_scroll_view"
-        android:scrollbarStyle="insideOverlay"
-        android:scrollbars="vertical"
+    <LinearLayout
+        android:id="@+id/scroll_view_content"
+        android:orientation="vertical"
+        android:animateLayoutChanges="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/scroll_view_content"
-            android:orientation="vertical"
-            android:animateLayoutChanges="true"
+        <include
+            layout="@layout/toolbar_web"
+            android:visibility="gone"
+            tools:visibility="visible"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="?attr/actionBarSize" />
 
-            <include
-                layout="@layout/toolbar_web"
-                android:visibility="gone"
-                tools:visibility="visible"
+        <FrameLayout
+            android:id="@+id/web_view_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <io.github.hidroh.materialistic.widget.CacheableWebView
+                android:id="@id/web_view"
+                android:scrollbarStyle="insideOverlay"
+                android:scrollbars="vertical"
+                android:focusableInTouchMode="true"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize" />
+                android:layout_height="match_parent" />
 
-            <FrameLayout
-                android:id="@+id/web_view_container"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+            <ViewStub
+                android:id="@id/empty"
+                android:inflatedId="@id/empty"
+                android:layout="@layout/button_download"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
-                <io.github.hidroh.materialistic.widget.CacheableWebView
-                    android:id="@id/web_view"
-                    android:scrollbarStyle="insideOverlay"
-                    android:scrollbars="vertical"
-                    android:focusableInTouchMode="true"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+        </FrameLayout>
 
-                <ViewStub
-                    android:id="@id/empty"
-                    android:inflatedId="@id/empty"
-                    android:layout="@layout/button_download"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </FrameLayout>
-
-        </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/fullscreen"

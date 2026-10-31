@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import androidx.annotation.IntDef;
 import com.google.android.material.appbar.AppBarLayout;
-import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
@@ -323,33 +322,6 @@ public class KeyDelegate {
 
         private LinearLayoutManager getLinearLayoutManager() {
             return (LinearLayoutManager) mRecyclerView.getLayoutManager();
-        }
-    }
-
-    /**
-     * Helper class to navigate vertical NestedScrollView
-     */
-    static class NestedScrollViewHelper implements Scrollable {
-
-        private final NestedScrollView mScrollView;
-
-        NestedScrollViewHelper(NestedScrollView nestedScrollView) {
-            mScrollView = nestedScrollView;
-        }
-
-        @Override
-        public void scrollToTop() {
-            mScrollView.smoothScrollTo(0, 0);
-        }
-
-        @Override
-        public boolean scrollToNext() {
-            return mScrollView.pageScroll(View.FOCUS_DOWN);
-        }
-
-        @Override
-        public boolean scrollToPrevious() {
-            return mScrollView.pageScroll(View.FOCUS_UP);
         }
     }
 

@@ -117,10 +117,12 @@ android.webkit.WebView
 ```
 
 **Key classes:**
-- `WebView` (`widget/WebView.java`) — Wraps Android WebView with `HistoryWebViewClient` that manages reload sequences (load `about:blank` → load target URL → clear history). Visibility is set when any non-blank page starts loading while a pending URL exists (handles redirects).
+- `WebView` (`widget/WebView.java`) — Wraps Android WebView with `HistoryWebViewClient` that manages reload sequences (load `about:blank` → load target URL → clear history). Visibility is set when any non-blank page starts loading while a pending URL exists (handles redirects). Also implements nested scrolling in `onTouchEvent()`: vertical drags are offered to nested scrolling parents (the collapsing `AppBarLayout` in `ItemActivity`) first, and only the remainder is fed to web content; drags the page cannot scroll are reported as unconsumed.
 - `CacheableWebView` (`widget/CacheableWebView.java`) — Adds `.mht` web archive caching. Configures WebView settings: JavaScript, DOM storage, third-party cookies, mixed content mode. Uses `LOAD_CACHE_ELSE_NETWORK` when online, `LOAD_CACHE_ONLY` when offline.
 - `AdBlockWebViewClient` (`widget/AdBlockWebViewClient.java`) — Intercepts requests via `shouldInterceptRequest()` and blocks ad hosts loaded from `assets/pgl.yoyo.org.txt`. Uses recursive subdomain matching.
 - `WebFragment` — Main article viewer. Uses `CacheableWebView` with `AdBlockWebViewClient`. Supports readability mode toggle, PDF viewing via JavaScript bridge, fullscreen mode, and find-in-page.
+
+**Important:** The article WebView must have a fixed (`match_parent`) height and scroll itself. Do not wrap it in a `ScrollView`/`NestedScrollView` with `wrap_content` height: Chromium then has no real viewport height, so pages sized with `vh` units collapse or render off-screen. `WebFragment` disables nested scrolling in fullscreen mode.
 
 **Important:** `HistoryWebViewClient` only delegates `onPageStarted`, `onPageFinished`, and `shouldInterceptRequest` to the wrapped client. Other `WebViewClient` callbacks (e.g. `shouldOverrideUrlLoading`) are NOT delegated.
 

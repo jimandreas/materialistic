@@ -31,6 +31,7 @@ Toolchain update by **Claude Opus 5.5** (Anthropic AI assistant):
 - Bumped AGP 9.0.1 → 9.5.0 and Gradle 9.3.1 → 9.8.2 (wrapper now verifies the distribution SHA-256 checksum)
 - Removed the lint `htmlReport`/`xmlReport`/`textReport` options deprecated in AGP 9.5
 - Raised the Gradle daemon heap to 4 GB (`org.gradle.jvmargs`); R8 ran out of memory on release builds with the 512 MB default
+- Fixed Article view for pages sized to the viewport (e.g. `100vh` layouts rendered blank or off-screen): the WebView now has a fixed height and scrolls itself, with nested scrolling to keep the collapsing header
 - Fixed lint errors so `./gradlew assembleRelease lint` passes: guarded API 26 StrictMode calls with an SDK check, and removed an incorrect `@WorkerThread` annotation from `FileDownloader.downloadFile` (it enqueues an async request)
 
 ### Changes (February 2026)
