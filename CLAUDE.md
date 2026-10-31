@@ -35,7 +35,16 @@ LeakCanary is not a dependency (the old `-Pleak` build flag was removed). Debug 
 
 ## Build System
 
-Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`). Key dependency versions: AGP 9.5.0, Kotlin 2.3.10, Retrofit 3.0.0, OkHttp 5.x, Room 2.8.x, Dagger 1.2.5, RxJava 1.3.8. Uses KAPT for annotation processing (Dagger 1 and Room).
+Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`). Key dependency versions: AGP 9.5.0, Kotlin 2.3.10, Retrofit 3.0.0, OkHttp 5.4.0, Room 2.8.5, Dagger 1.2.5, RxJava 1.3.8. Uses KAPT for annotation processing (Dagger 1 and Room).
+
+### Dependency Update Status (October 31, 2026)
+
+Updates are done in risk-ordered groups, one commit each, verified with `assembleDebug assembleRelease lint` and then device-tested by the user.
+
+- **Group A (done, device-tested successfully):** Room 2.8.4 → 2.8.5, OkHttp + logging-interceptor 5.3.2 → 5.4.0, androidx.browser 1.9.0 → 1.10.0; removed `lifecycle-compiler` (an annotation processor wrongly declared as `implementation`, and unused). OkHttp is held at 5.4.0 because 5.5.0+ requires `compileSdk` 37 (API 37 platform is not installed); bumping `compileSdk` would unlock 5.5.x.
+- **Group B (paused, not started):** appcompat 1.7.1 → 1.8.0, Material 1.13.0 → 1.14.0, lifecycle 2.10.0 → 2.11.0. Device-test themes, the item screen's collapsing header/tabs, Snackbars and comments.
+- **Group C (paused, not started):** Kotlin + KAPT plugin 2.3.10 → 2.4.x (expected to clear the `Configuration.setVisible` warning).
+- **Blocked:** Dagger 1.2.5 and RxJava/RxAndroid 1.x are end-of-line; updating them is a migration, not a version bump.
 
 ## Build Warnings
 
@@ -153,6 +162,16 @@ Jetpack ViewModel/LiveData is used in a few places alongside Rx (e.g. `StoryList
 - Mix of Java and Kotlin; newer files tend to be Kotlin
 - `@PublicApi` — Marks APIs that should be discoverable (SOURCE retention)
 - `@Synthetic` — Marks fields/methods with relaxed visibility to avoid synthetic accessor generation
+
+## Before Each Claude Push
+
+After the user has tested the changes successfully, and before pushing, update the "Updated by Claude" date in the About screen to the current date. It lives in the `application_info_text` string in all three locales:
+
+- `app/src/main/res/values/strings.xml`: `Updated by Claude, October 31, 2026`
+- `app/src/main/res/values-es/strings.xml`: `Actualizado por Claude, 31 de octubre de 2026`
+- `app/src/main/res/values-zh-rCN/strings.xml`: `由 Claude 更新，2026年10月31日`
+
+The same string also links the updated source repo (`github.com/jimandreas/materialistic`) under the original `hidroh/materialistic` link.
 
 ## API Keys
 
