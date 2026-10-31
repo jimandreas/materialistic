@@ -34,6 +34,27 @@
     <uses-permission android:name="io.github.hidroh.materialistic.permission.SYNC_ITEM" />
     <uses-permission android:name="io.github.hidroh.materialistic.permission.AUTHENTICATE_ACCOUNTS" />
 
+    <!-- Android 11+ package visibility: needed to resolve browsers / share targets / custom tabs -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/plain" />
+        </intent>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
     <application
         android:name=".Application"
         android:supportsRtl="false"

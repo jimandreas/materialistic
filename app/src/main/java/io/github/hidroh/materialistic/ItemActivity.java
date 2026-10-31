@@ -50,6 +50,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -73,6 +74,12 @@ public class ItemActivity extends InjectableActivity implements ItemFragment.Ite
     public static final String EXTRA_ITEM = ItemActivity.class.getName() + ".EXTRA_ITEM";
     public static final String EXTRA_CACHE_MODE = ItemActivity.class.getName() + ".EXTRA_CACHE_MODE";
     public static final String EXTRA_OPEN_COMMENTS = ItemActivity.class.getName() + ".EXTRA_OPEN_COMMENTS";
+    /**
+     * If the item to view is a comment, show it in place within its story's comment thread
+     * (expanded and scrolled to) instead of as the root of its own thread
+     */
+    public static final String EXTRA_SHOW_IN_STORY = ItemActivity.class.getName() + ".EXTRA_SHOW_IN_STORY";
+    private static final int MAX_COMMENT_DEPTH = 500;
     private static final String PARAM_ID = "id";
     private static final String STATE_ITEM = "state:item";
     private static final String STATE_ITEM_ID = "state:itemId";
@@ -309,9 +316,48 @@ public class ItemActivity extends InjectableActivity implements ItemFragment.Ite
 
     @Synthetic
     void onItemLoaded(@Nullable Item response) {
+        if (response != null && Item.COMMENT_TYPE.equals(response.getType()) &&
+                getIntent().getBooleanExtra(EXTRA_SHOW_IN_STORY, false)) {
+            // walk up to the story, then show this comment in place within it
+            ArrayList<Item> commentPath = new ArrayList<>();
+            commentPath.add(response);
+            loadParent(response, commentPath);
+            return;
+        }
         mItem = response;
         supportInvalidateOptionsMenu();
-        bindData(mItem);
+        bindData(mItem, null);
+    }
+
+    private void loadParent(@NonNull Item comment, @NonNull ArrayList<Item> commentPath) {
+        mItemManager.getItem(comment.getParent(),
+                getIntent().getIntExtra(EXTRA_CACHE_MODE, ItemManager.MODE_DEFAULT),
+                new ParentResponseListener(this, commentPath));
+    }
+
+    /**
+     * @param parent      loaded parent of the first item in {@code commentPath}, or null on error
+     * @param commentPath comments from the top-level comment down to the linked comment
+     */
+    @Synthetic
+    void onParentLoaded(@Nullable Item parent, @NonNull ArrayList<Item> commentPath) {
+        if (parent == null || commentPath.size() > MAX_COMMENT_DEPTH) {
+            // cannot resolve story: fall back to showing the linked comment as its own thread
+            mItem = commentPath.get(commentPath.size() - 1);
+            supportInvalidateOptionsMenu();
+            bindData(mItem, null);
+            return;
+        }
+        if (Item.COMMENT_TYPE.equals(parent.getType())) {
+            commentPath.add(0, parent);
+            loadParent(parent, commentPath);
+            return;
+        }
+        mItem = parent;
+        mItemId = parent.getId();
+        mStoryViewMode = Preferences.StoryViewMode.Comment;
+        supportInvalidateOptionsMenu();
+        bindData(mItem, commentPath);
     }
 
     @Synthetic
@@ -352,6 +398,11 @@ public class ItemActivity extends InjectableActivity implements ItemFragment.Ite
 
     @SuppressWarnings("ConstantConditions")
     private void bindData(@Nullable final WebItem story) {
+        bindData(story, null);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private void bindData(@Nullable final WebItem story, @Nullable ArrayList<Item> commentPath) {
         if (story == null) {
             return;
         }
@@ -399,6 +450,7 @@ public class ItemActivity extends InjectableActivity implements ItemFragment.Ite
                         .setShowArticle(hasText || !mExternalBrowser)
                         .setCacheMode(getIntent().getIntExtra(EXTRA_CACHE_MODE, ItemManager.MODE_DEFAULT))
                         .setRetainInstance(true)
+                        .setCommentPath(commentPath)
                         .setDefaultViewMode(mStoryViewMode));
         mAdapter.bind(mViewPager, mTabLayout, mNavButton, mReplyButton);
         mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
@@ -483,6 +535,31 @@ public class ItemActivity extends InjectableActivity implements ItemFragment.Ite
         @Override
         public void onError(String errorMessage) {
             // do nothing
+        }
+    }
+
+    static class ParentResponseListener implements ResponseListener<Item> {
+        private final WeakReference<ItemActivity> mItemActivity;
+        private final ArrayList<Item> mCommentPath;
+
+        @Synthetic
+        ParentResponseListener(ItemActivity itemActivity, ArrayList<Item> commentPath) {
+            mItemActivity = new WeakReference<>(itemActivity);
+            mCommentPath = commentPath;
+        }
+
+        @Override
+        public void onResponse(@Nullable Item response) {
+            if (mItemActivity.get() != null && !mItemActivity.get().isActivityDestroyed()) {
+                mItemActivity.get().onParentLoaded(response, mCommentPath);
+            }
+        }
+
+        @Override
+        public void onError(String errorMessage) {
+            if (mItemActivity.get() != null && !mItemActivity.get().isActivityDestroyed()) {
+                mItemActivity.get().onParentLoaded(null, mCommentPath);
+            }
         }
     }
 

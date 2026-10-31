@@ -275,6 +275,28 @@ public class SinglePageItemRecyclerViewAdapter
     }
 
     @Override
+    public int revealPath(List<Item> path) {
+        int position = RecyclerView.NO_POSITION;
+        for (int i = 0; i < path.size(); i++) {
+            Item loaded = path.get(i);
+            Item item = mState.map.get(loaded.getLongId());
+            if (item == null) { // e.g. comment no longer listed by its parent
+                break;
+            }
+            if (item.getLocalRevision() < 0) { // not loaded yet, reuse what we have
+                item.populate(loaded);
+            }
+            position = mState.indexOf(item);
+            flashOnBind(item.getId());
+            if (i < path.size() - 1 && !mState.isExpanded(item)) {
+                item.setCollapsed(false);
+                mState.expand(item);
+            }
+        }
+        return position;
+    }
+
+    @Override
     public void lockBinding(int[] lock) {
         mLock = lock;
     }

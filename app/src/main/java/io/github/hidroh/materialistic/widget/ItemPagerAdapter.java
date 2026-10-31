@@ -19,6 +19,7 @@ package io.github.hidroh.materialistic.widget;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
@@ -26,6 +27,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
 
 import io.github.hidroh.materialistic.AppUtils;
 import io.github.hidroh.materialistic.ItemFragment;
@@ -46,6 +49,7 @@ public class ItemPagerAdapter extends FragmentStatePagerAdapter {
     private final int mCacheMode;
     private final int mDefaultItem;
     private final boolean mRetainInstance;
+    private final ArrayList<Item> mCommentPath;
     private TabLayout.OnTabSelectedListener mTabListener;
 
     public ItemPagerAdapter(Context context, FragmentManager fm, @NonNull Builder builder) {
@@ -55,6 +59,7 @@ public class ItemPagerAdapter extends FragmentStatePagerAdapter {
         mShowArticle = builder.showArticle;
         mCacheMode = builder.cacheMode;
         mRetainInstance = builder.retainInstance;
+        mCommentPath = builder.commentPath;
         mDefaultItem = Math.min(getCount()-1,
                 builder.defaultViewMode == Preferences.StoryViewMode.Comment ? 0 : 1);
     }
@@ -71,6 +76,9 @@ public class ItemPagerAdapter extends FragmentStatePagerAdapter {
             args.putParcelable(ItemFragment.EXTRA_ITEM, mItem);
             args.putInt(ItemFragment.EXTRA_CACHE_MODE, mCacheMode);
             args.putBoolean(ItemFragment.EXTRA_RETAIN_INSTANCE, mRetainInstance);
+            if (mCommentPath != null) {
+                args.putParcelableArrayList(ItemFragment.EXTRA_COMMENT_PATH, mCommentPath);
+            }
             fragmentName = ItemFragment.class.getName();
         } else {
             args.putParcelable(WebFragment.EXTRA_ITEM, mItem);
@@ -158,6 +166,7 @@ public class ItemPagerAdapter extends FragmentStatePagerAdapter {
         int cacheMode;
         Preferences.StoryViewMode defaultViewMode;
         boolean retainInstance;
+        ArrayList<Item> commentPath;
 
         public Builder setItem(@NonNull WebItem item) {
             this.item = item;
@@ -181,6 +190,15 @@ public class ItemPagerAdapter extends FragmentStatePagerAdapter {
 
         public Builder setRetainInstance(boolean retainInstance) {
             this.retainInstance = retainInstance;
+            return this;
+        }
+
+        /**
+         * @param commentPath comments from a top-level comment down to a comment to scroll to
+         *                    and highlight in the comment thread, or null
+         */
+        public Builder setCommentPath(@Nullable ArrayList<Item> commentPath) {
+            this.commentPath = commentPath;
             return this;
         }
     }

@@ -17,12 +17,15 @@
 package io.github.hidroh.materialistic.widget;
 
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Build;
 import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -34,6 +37,7 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -55,6 +59,9 @@ public abstract class ItemRecyclerViewAdapter<VH extends ItemRecyclerViewAdapter
         extends RecyclerViewAdapter<VH> {
     private static final String PROPERTY_MAX_LINES = "maxLines";
     private static final int DURATION_PER_LINE_MILLIS = 20;
+    private static final long FLASH_DELAY_MILLIS = 600;
+    private static final long FLASH_DURATION_MILLIS = 1500;
+    private static final float FLASH_BLEND_RATIO = 0.35f;
     LayoutInflater mLayoutInflater;
     private ItemManager mItemManager;
     @Inject UserServices mUserServices;
@@ -69,6 +76,7 @@ public abstract class ItemRecyclerViewAdapter<VH extends ItemRecyclerViewAdapter
     private final Map<String, Integer> mLineCounted = new HashMap<>();
     private int mCacheMode = ItemManager.MODE_DEFAULT;
     private float mLineHeight = 1.0f;
+    private String mFlashItemId;
 
     public interface PositionCallback {
         void onPosition(int position);
@@ -141,6 +149,26 @@ public abstract class ItemRecyclerViewAdapter<VH extends ItemRecyclerViewAdapter
 
     public void lockBinding(int[] lock) { }
 
+    /**
+     * Reveals a comment nested within this adapter's items, expanding its ancestors as needed,
+     * and highlights it once it is bound. Must be called before the adapter is set on its
+     * {@link RecyclerView}, as it changes the adapter's items without notifying.
+     *
+     * @param path loaded comments, from a top-level comment down to the comment to reveal
+     * @return adapter position of the revealed comment (or its deepest shown ancestor),
+     * or {@link RecyclerView#NO_POSITION} if not found
+     */
+    public int revealPath(List<Item> path) {
+        return RecyclerView.NO_POSITION;
+    }
+
+    /**
+     * Briefly highlights item with given ID the next time it is bound
+     */
+    void flashOnBind(@Nullable String itemId) {
+        mFlashItemId = itemId;
+    }
+
     @Nullable
     protected abstract Item getItem(int position);
 
@@ -170,6 +198,11 @@ public abstract class ItemRecyclerViewAdapter<VH extends ItemRecyclerViewAdapter
     }
 
     protected void clear(VH holder) {
+        if (holder.mFlashAnimator != null) {
+            holder.mFlashAnimator.cancel();
+            holder.mFlashAnimator = null;
+            holder.mContentView.setBackgroundColor(mCardBackgroundColorResId);
+        }
         holder.mCommentButton.setVisibility(View.GONE);
         holder.mPostedTextView.setOnClickListener(null);
         holder.mPostedTextView.setText(R.string.loading_text);
@@ -197,8 +230,26 @@ public abstract class ItemRecyclerViewAdapter<VH extends ItemRecyclerViewAdapter
     private void highlightUserItem(VH holder, Item item) {
         boolean highlight = !TextUtils.isEmpty(mUsername) &&
                 TextUtils.equals(mUsername, item.getBy());
-        holder.mContentView.setBackgroundColor(highlight ?
-                mCardHighlightColorResId : mCardBackgroundColorResId);
+        int backgroundColor = highlight ? mCardHighlightColorResId : mCardBackgroundColorResId;
+        if (holder.mFlashAnimator != null) { // view recycled while flashing
+            holder.mFlashAnimator.cancel();
+            holder.mFlashAnimator = null;
+        }
+        if (mFlashItemId != null && TextUtils.equals(mFlashItemId, item.getId())) {
+            mFlashItemId = null;
+            int flashColor = ColorUtils.blendARGB(backgroundColor, ContextCompat.getColor(mContext,
+                    AppUtils.getThemedResId(mContext, R.attr.colorAccent)), FLASH_BLEND_RATIO);
+            holder.mContentView.setBackgroundColor(flashColor);
+            ValueAnimator animator = ValueAnimator.ofArgb(flashColor, backgroundColor);
+            animator.setStartDelay(FLASH_DELAY_MILLIS);
+            animator.setDuration(FLASH_DURATION_MILLIS);
+            animator.addUpdateListener(animation ->
+                    holder.mContentView.setBackgroundColor((int) animation.getAnimatedValue()));
+            holder.mFlashAnimator = animator;
+            animator.start();
+        } else {
+            holder.mContentView.setBackgroundColor(backgroundColor);
+        }
     }
 
     private void decorateDead(VH holder, Item item) {
@@ -280,6 +331,7 @@ public abstract class ItemRecyclerViewAdapter<VH extends ItemRecyclerViewAdapter
         TextView mCommentButton;
         View mMoreButton;
         View mContentView;
+        ValueAnimator mFlashAnimator;
 
         ItemViewHolder(View itemView) {
             super(itemView);

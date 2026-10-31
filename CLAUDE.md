@@ -126,6 +126,15 @@ android.webkit.WebView
 
 **Important:** `HistoryWebViewClient` only delegates `onPageStarted`, `onPageFinished`, and `shouldInterceptRequest` to the wrapped client. Other `WebViewClient` callbacks (e.g. `shouldOverrideUrlLoading`) are NOT delegated.
 
+### Link Handling
+
+Links in comments, story text and user profiles are made tappable by `AppUtils.setTextWithLinks()` (a custom touch listener, not `LinkMovementMethod`):
+
+- `AppUtils.openHackerNewsUrlInternal()` routes `news.ycombinator.com/item?id=…` and `/user?id=…` links in-app (`ItemActivity` / `UserActivity`, started on top so Back returns to the tapped link). Everything else goes to `openWebUrlExternal()` (browser or Custom Tabs; HN links opened through it deliberately exclude this app, e.g. "Open in browser").
+- Item links set `ItemActivity.EXTRA_SHOW_IN_STORY`. If the item is a comment, `ItemActivity` walks `getParent()` up to the story, then opens the story with the comment path (`ItemFragment.EXTRA_COMMENT_PATH`, via `ItemPagerAdapter.Builder.setCommentPath()`). `ItemFragment` calls the adapter's `revealPath()` once, **before** `setAdapter()` (it mutates adapter state without notifying), then scrolls to the returned position; the comment is flashed on first bind. Single-page mode expands ancestors to the exact comment; multi-page mode can only show the top-level ancestor. If the parent chain can't be loaded, it falls back to showing the comment as its own thread. Deep links from outside the app don't set the flag.
+
+**Important:** the app targets SDK 36, so Android 11+ package visibility applies. `resolveActivity()` / `queryIntentActivities()` only see apps matching the manifest's `<queries>` (VIEW http/https, SEND text/plain, Custom Tabs service). Add a `<queries>` entry for any new implicit intent that is resolved before launching, or launch it and catch `ActivityNotFoundException` instead. `lint.xml` downgrades `QueryPermissionsNeeded` to informational, so lint won't flag this.
+
 ### Reactive Patterns
 
 Uses RxJava 1.x (not 2.x) with schedulers injected via `@Named(IO_THREAD)` and `@Named(MAIN_THREAD)`.

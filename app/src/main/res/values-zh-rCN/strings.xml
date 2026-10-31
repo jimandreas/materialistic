@@ -142,6 +142,7 @@
     <string name="feedback_sent">非常感谢您的反馈</string>
     <string name="feedback_failed">提交反馈失败，请稍后重试</string>
     <string name="chooser_title">打开使用</string>
+    <string name="no_app_to_open_link">未找到可打开此链接的应用</string>
     <string name="title_activity_popular">热门帖子</string>
     <string name="range">范围</string>
     <string name="popular_range_last_24h">24小时内</string>

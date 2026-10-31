@@ -55,6 +55,11 @@ public class ItemFragment extends LazyLoadFragment implements Scrollable, Naviga
 
     public static final String EXTRA_ITEM = ItemFragment.class.getName() + ".EXTRA_ITEM";
     public static final String EXTRA_CACHE_MODE = ItemFragment.class.getName() + ".EXTRA_CACHE_MODE";
+    /**
+     * {@link ArrayList} of {@link Item}: comments from a top-level comment down to a comment
+     * to expand, scroll to and highlight once comments are shown
+     */
+    public static final String EXTRA_COMMENT_PATH = ItemFragment.class.getName() + ".EXTRA_COMMENT_PATH";
     private static final String STATE_ITEM = "state:item";
     private static final String STATE_ITEM_ID = "state:itemId";
     private static final String STATE_ADAPTER_ITEMS = "state:adapterItems";
@@ -72,6 +77,7 @@ public class ItemFragment extends LazyLoadFragment implements Scrollable, Naviga
     private final Preferences.Observable mPreferenceObservable = new Preferences.Observable();
     private CommentItemDecoration mItemDecoration;
     private View mFragmentView;
+    private ArrayList<Item> mCommentPath;
 
     @Override
     public void onAttach(Context context) {
@@ -105,6 +111,7 @@ public class ItemFragment extends LazyLoadFragment implements Scrollable, Naviga
                 mItem = (Item) item;
             }
             mItemId = item != null ? item.getId() : null;
+            mCommentPath = getArguments().getParcelableArrayList(EXTRA_COMMENT_PATH);
         }
     }
 
@@ -251,7 +258,17 @@ public class ItemFragment extends LazyLoadFragment implements Scrollable, Naviga
         mAdapter.setCacheMode(mCacheMode);
         mAdapter.initDisplayOptions(getActivity());
         mAdapter.attach(getActivity(), mRecyclerView);
+        int revealedPosition = RecyclerView.NO_POSITION;
+        if (mCommentPath != null) {
+            // one-off: reveal linked comment the first time comments are shown
+            revealedPosition = mAdapter.revealPath(mCommentPath);
+            mCommentPath = null;
+        }
         mRecyclerView.setAdapter(mAdapter);
+        if (revealedPosition != RecyclerView.NO_POSITION) {
+            ((SnappyLinearLayoutManager) mRecyclerView.getLayoutManager())
+                    .scrollToPositionWithOffset(revealedPosition, 0);
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")

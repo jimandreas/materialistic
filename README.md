@@ -26,7 +26,11 @@ Material design [Hacker News] client for Android, uses official [HackerNews/API]
 Grab your Mercury Web Parser API key [here][mercury] [DEAD LINK] if you want to connect to Mercury.
 
 ### Changes (October 2026)
-Toolchain update by **Claude Opus 5.5** (Anthropic AI assistant):
+Toolchain update and bug fixes by **Claude Opus 5.5** (Anthropic AI assistant):
+
+- Fixed links in comments doing nothing when tapped on Android 11+: the manifest now declares `<queries>` for browsers, share targets and Custom Tabs (package visibility), and a toast is shown if no app can open a link
+- Hacker News item and user links in comments, story text and user profiles now open in-app; Back returns to the comment where the link was tapped
+- Comment links open the comment in place within its story: parent comments are expanded, the list scrolls to the comment, and it is briefly highlighted (in multi-page comment mode, its top-level thread is shown)
 
 - Bumped AGP 9.0.1 → 9.5.0 and Gradle 9.3.1 → 9.8.2 (wrapper now verifies the distribution SHA-256 checksum)
 - Removed the lint `htmlReport`/`xmlReport`/`textReport` options deprecated in AGP 9.5

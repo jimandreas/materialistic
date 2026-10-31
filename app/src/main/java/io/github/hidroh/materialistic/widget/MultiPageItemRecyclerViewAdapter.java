@@ -21,6 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.Arrays;
+import java.util.List;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import io.github.hidroh.materialistic.ItemActivity;
 import io.github.hidroh.materialistic.R;
@@ -80,6 +83,26 @@ public class MultiPageItemRecyclerViewAdapter
             holder.mCommentButton.setVisibility(View.VISIBLE);
             holder.mCommentButton.setOnClickListener(v -> openItem(item));
         }
+    }
+
+    @Override
+    public int revealPath(List<Item> path) {
+        // only top-level comments are shown on this page, reveal the linked comment's thread
+        if (path.isEmpty()) {
+            return RecyclerView.NO_POSITION;
+        }
+        Item loaded = path.get(0);
+        for (int i = 0; i < mItems.length; i++) {
+            Item item = mItems[i];
+            if (item != null && item.getLongId() == loaded.getLongId()) {
+                if (item.getLocalRevision() < 0) {
+                    item.populate(loaded);
+                }
+                flashOnBind(item.getId());
+                return i;
+            }
+        }
+        return RecyclerView.NO_POSITION;
     }
 
     @Override

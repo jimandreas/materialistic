@@ -109,6 +109,7 @@
     <string name="feedback_sent">Opinión enviada. Gracias!</string>
     <string name="feedback_failed">Imposible enviar, por favor intentalo de nuevo</string>
     <string name="chooser_title">Abrir con</string>
+    <string name="no_app_to_open_link">No se encontró ninguna aplicación para abrir este enlace</string>
     <string name="title_activity_popular">Ponte al día!</string>
     <string name="range">Rango</string>
     <string name="popular_range_last_24h">Últimas 24 horas</string>

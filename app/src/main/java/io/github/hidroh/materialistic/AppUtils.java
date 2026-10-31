@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -102,8 +103,10 @@ public class AppUtils {
         }
         Intent intent = createViewIntent(context, item, url, session);
         if (!HackerNewsClient.BASE_WEB_URL.contains(Uri.parse(url).getHost())) {
-            if (intent.resolveActivity(context.getPackageManager()) != null) {
+            try {
                 context.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(context, R.string.no_app_to_open_link, Toast.LENGTH_SHORT).show();
             }
             return;
         }
@@ -162,8 +165,10 @@ public class AppUtils {
                     if (links.length != 0) {
                         if (action == MotionEvent.ACTION_UP) {
                             if (links[0] instanceof URLSpan) {
-                                openWebUrlExternal(widget.getContext(), null,
-                                        ((URLSpan) links[0]).getURL(), null);
+                                String url = ((URLSpan) links[0]).getURL();
+                                if (!openHackerNewsUrlInternal(widget.getContext(), url)) {
+                                    openWebUrlExternal(widget.getContext(), null, url, null);
+                                }
                             } else {
                                 links[0].onClick(widget);
                             }
@@ -174,6 +179,52 @@ public class AppUtils {
                 return false;
             }
         });
+    }
+
+    /**
+     * Opens Hacker News item or user links (e.g. {@code news.ycombinator.com/item?id=123})
+     * in-app instead of in a browser. The target activity is started on top of the current
+     * one, so Back returns to where the link was tapped, at the same scroll position.
+     *
+     * @return true if the URL was handled in-app, false if it should be opened externally
+     */
+    static boolean openHackerNewsUrlInternal(Context context, String url) {
+        Uri uri = Uri.parse(url);
+        String host = uri.getHost();
+        String scheme = uri.getScheme();
+        if (host == null || uri.isOpaque() ||
+                !("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) ||
+                !Uri.parse(HackerNewsClient.BASE_WEB_URL).getHost().equalsIgnoreCase(host)) {
+            return false;
+        }
+        String id = uri.getQueryParameter("id");
+        if (TextUtils.isEmpty(id)) {
+            return false;
+        }
+        Intent intent;
+        String path = uri.getPath();
+        if (TextUtils.equals(path, "/" + HOST_ITEM)) {
+            if (!TextUtils.isDigitsOnly(id)) {
+                return false;
+            }
+            intent = new Intent(Intent.ACTION_VIEW, createItemUri(id))
+                    .setClass(context, ItemActivity.class)
+                    .putExtra(ItemActivity.EXTRA_SHOW_IN_STORY, true);
+        } else if (TextUtils.equals(path, "/" + HOST_USER)) {
+            intent = new Intent(Intent.ACTION_VIEW, createUserUri(id))
+                    .setClass(context, UserActivity.class);
+        } else {
+            return false;
+        }
+        Context base = context;
+        while (!(base instanceof Activity) && base instanceof ContextWrapper) {
+            base = ((ContextWrapper) base).getBaseContext();
+        }
+        if (!(base instanceof Activity)) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
+        return true;
     }
 
     public static CharSequence fromHtml(String htmlText) {
