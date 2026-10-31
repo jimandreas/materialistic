@@ -1,7 +1,7 @@
 ## Materialistic for Hacker News
 Material design [Hacker News] client for Android, uses official [HackerNews/API], [Dagger] for dependency injection.
 
-[![Get it on Google Play][Play Store Badge]][Play Store]
+[![Get it on Google Play][Play Store Badge]][Play Store] [DEAD LINK]
 
 ### Setup
 **Requirements**
@@ -13,7 +13,7 @@ Material design [Hacker News] client for Android, uses official [HackerNews/API]
 **Dependencies**
 - [Official Hacker News API][HackerNews/API], user services (e.g. login/create account/vote/comment) rely on redirect requests to Hacker News website
 - [Algolia Hacker News Search API]
-- [Mercury Web Parser API]
+- [Mercury Web Parser API] [DEAD LINK]
 - [Android Jetpack]: appcompat / recyclerview / material / cardview / preference / customtabs / room
 - Square [Retrofit] / [OkHttp] / [Dagger]
 - [RxJava] & [RxAndroid]
@@ -23,7 +23,7 @@ Material design [Hacker News] client for Android, uses official [HackerNews/API]
 
     ./gradlew assembleDebug
 
-Grab your Mercury Web Parser API key [here][mercury] if you want to connect to Mercury.
+Grab your Mercury Web Parser API key [here][mercury] [DEAD LINK] if you want to connect to Mercury.
 
 ### Changes (October 2026)
 Toolchain update by **Claude Opus 5.5** (Anthropic AI assistant):
@@ -66,7 +66,7 @@ Modernization updates by **Claude Opus 4.5** (Anthropic AI assistant):
 - [Supporting multiple themes in your Android app (Part 2)][article-theme2] [![][Android Weekly 144 Badge]][Android Weekly 144]
 - [Building custom preferences with preference-v7][article-preference]
 - [Hacking up an ad blocker for Android][article-adblocker]
-- [Bottom sheet everything][article-bottom-sheet] [![][AndroidDev Digest 99 Badge]][AndroidDev Digest 99] [![][Android Weekly 227 Badge]][Android Weekly 227]
+- [Bottom sheet everything][article-bottom-sheet] [![][Android Weekly 227 Badge]][Android Weekly 227]
 
 ### Screenshots
 <img src="assets/screenshot-1.png" width="200px" />
@@ -114,6 +114,4 @@ Contributions are always welcome. Please make sure you read [Contributing notes]
 [Android Weekly 227 Badge]: https://img.shields.io/badge/android--weekly-227-blue.svg
 [Android Weekly 144]: http://androidweekly.net/issues/issue-144
 [Android Weekly 227]: http://androidweekly.net/issues/issue-227
-[AndroidDev Digest 99 Badge]: https://img.shields.io/badge/androiddev--digest-99-blue.svg
-[AndroidDev Digest 99]: https://www.androiddevdigest.com/digest-99/
 [PDF.js]: https://mozilla.github.io/pdf.js/
