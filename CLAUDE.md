@@ -31,26 +31,29 @@ LeakCanary is not a dependency (the old `-Pleak` build flag was removed). Debug 
 - JDK 17 (compilation target)
 - Android SDK with compileSdk/targetSdk 36
 - Min SDK: 23 (Android 6.0)
-- Gradle 9.3.1 (via wrapper)
+- Gradle 9.8.2 (via wrapper, with `distributionSha256Sum` verification)
 
 ## Build System
 
-Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`). Key dependency versions: AGP 9.0.1, Kotlin 2.3.10, Retrofit 3.0.0, OkHttp 5.x, Room 2.8.x, Dagger 1.2.5, RxJava 1.3.8. Uses KAPT for annotation processing (Dagger 1 and Room).
+Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`). Key dependency versions: AGP 9.5.0, Kotlin 2.3.10, Retrofit 3.0.0, OkHttp 5.x, Room 2.8.x, Dagger 1.2.5, RxJava 1.3.8. Uses KAPT for annotation processing (Dagger 1 and Room).
 
 ## Build Warnings
 
-The build currently emits four deprecation warnings that cannot be resolved without a major refactor:
+The build currently emits five deprecation warnings that cannot be resolved without a major refactor:
 
 - `android.builtInKotlin=false` is deprecated (AGP default is now `true`)
 - `android.newDsl=false` is deprecated (AGP default is now `true`)
 - `org.jetbrains.kotlin.android` plugin is deprecated in AGP 9.0+
 - `BaseAppModuleExtension` `android {}` accessor is deprecated, replaced by `ApplicationExtension`
+- Gradle 9.8's `Configuration.setVisible(boolean)` deprecation, emitted by the Kotlin Gradle plugin 2.3.10 itself (likely fixed by a Kotlin 2.4.x bump)
 
-**Root cause:** AGP 9.0 built-in Kotlin is incompatible with the `kotlin.kapt` plugin. KAPT cannot be removed because Dagger 1.2.5 has no KSP migration path. Resolving these warnings requires replacing Dagger 1.x with Dagger 2 / Hilt and migrating Room annotation processing from KAPT to KSP.
+**Root cause** (first four): AGP 9.0 built-in Kotlin is incompatible with the `kotlin.kapt` plugin. KAPT cannot be removed because Dagger 1.2.5 has no KSP migration path. Resolving these warnings requires replacing Dagger 1.x with Dagger 2 / Hilt and migrating Room annotation processing from KAPT to KSP.
 
-All other AGP deprecation warnings have been resolved (removed `android.usesSdkInManifest.disallowed`, `android.sdk.defaultTargetSdkToCompileSdkIfUnset`, `android.enableAppCompileTimeRClass`, `android.defaults.buildfeatures.resvalues`, `android.r8.optimizedResourceShrinking`; suppressed `excludeLibraryComponentsFromConstraints` sync warnings).
+All other AGP deprecation warnings have been resolved (removed `android.usesSdkInManifest.disallowed`, `android.sdk.defaultTargetSdkToCompileSdkIfUnset`, `android.enableAppCompileTimeRClass`, `android.defaults.buildfeatures.resvalues`, `android.r8.optimizedResourceShrinking`; suppressed `excludeLibraryComponentsFromConstraints` sync warnings; removed the lint `htmlReport`/`xmlReport`/`textReport` options, which AGP 9.5 deprecates because reports are always generated).
 
-Lint configuration is in `lint.xml` at the project root. Lint is strict (`abortOnError = true`) — builds fail on warnings or errors.
+Lint configuration is in `lint.xml` at the project root. Lint runs with `abortOnError = true`: lint errors fail the build, warnings are reported but do not. `./gradlew assembleRelease lint` currently passes with 0 errors.
+
+`gradle.properties` sets `org.gradle.jvmargs=-Xmx4g`; with Gradle's default 512 MB daemon heap, R8 runs out of memory on `assembleRelease`.
 
 ProGuard is split across four files (`proguard-rules.pro`, `proguard-square.pro`, `proguard-support.pro`, `proguard-rx.pro`). Obfuscation is disabled (`-dontobfuscate`); only shrinking is enabled for release builds.
 

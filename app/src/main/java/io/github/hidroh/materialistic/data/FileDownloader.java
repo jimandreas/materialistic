@@ -3,7 +3,6 @@ package io.github.hidroh.materialistic.data;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.WorkerThread;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +37,6 @@ public class FileDownloader {
         return mCacheDir;
     }
 
-    @WorkerThread
     public void downloadFile(String url, String mimeType, FileDownloaderCallback callback) {
         File outputFile = new File(getCacheDir(), new File(url).getName());
         if (outputFile.exists()) {

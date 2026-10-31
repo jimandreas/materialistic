@@ -18,6 +18,7 @@ package io.github.hidroh.materialistic;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.StrictMode;
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -53,15 +54,16 @@ public class Application extends android.app.Application implements Injectable {
             // detectCleartextNetwork() is omitted because it produces false
             // positives for QUIC (HTTP/3) traffic — encrypted UDP to port 443
             // is misidentified as cleartext.
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+            StrictMode.VmPolicy.Builder vmPolicy = new StrictMode.VmPolicy.Builder()
                     .detectLeakedSqlLiteObjects()
                     .detectActivityLeaks()
                     .detectLeakedRegistrationObjects()
-                    .detectFileUriExposure()
-                    .detectContentUriWithoutPermission()
-                    .detectUntaggedSockets()
-                    .penaltyLog()
-                    .build());
+                    .detectFileUriExposure();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vmPolicy.detectContentUriWithoutPermission()
+                        .detectUntaggedSockets();
+            }
+            StrictMode.setVmPolicy(vmPolicy.penaltyLog().build());
         }
         Preferences.migrate(this);
         TYPE_FACE = FontCache.getInstance().get(this, Preferences.Theme.getTypeface(this));

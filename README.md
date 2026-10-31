@@ -25,6 +25,14 @@ Material design [Hacker News] client for Android, uses official [HackerNews/API]
 
 Grab your Mercury Web Parser API key [here][mercury] if you want to connect to Mercury.
 
+### Changes (October 2026)
+Toolchain update by **Claude Opus 5.5** (Anthropic AI assistant):
+
+- Bumped AGP 9.0.1 → 9.5.0 and Gradle 9.3.1 → 9.8.2 (wrapper now verifies the distribution SHA-256 checksum)
+- Removed the lint `htmlReport`/`xmlReport`/`textReport` options deprecated in AGP 9.5
+- Raised the Gradle daemon heap to 4 GB (`org.gradle.jvmargs`); R8 ran out of memory on release builds with the 512 MB default
+- Fixed lint errors so `./gradlew assembleRelease lint` passes: guarded API 26 StrictMode calls with an SDK check, and removed an incorrect `@WorkerThread` annotation from `FileDownloader.downloadFile` (it enqueues an async request)
+
 ### Changes (February 2026)
 Build modernization by **Claude Sonnet 4.6** (Anthropic AI assistant):
 

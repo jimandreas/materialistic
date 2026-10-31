@@ -63,9 +63,6 @@ android {
     }
 
     lint {
-        htmlReport = false
-        xmlReport = false
-        textReport = true
         lintConfig = file("${rootProject.rootDir}/lint.xml")
         abortOnError = true
         explainIssues = false
