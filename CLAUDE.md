@@ -28,7 +28,7 @@ LeakCanary is not a dependency (the old `-Pleak` build flag was removed). Debug 
 
 ## Requirements
 
-- JDK 17 (compilation target)
+- JDK 17 (compilation target). The Gradle daemon JVM is pinned to JDK 17 (any vendor) via `gradle/gradle-daemon-jvm.properties`; the foojay toolchain resolver plugin in `settings.gradle.kts` lets Gradle download one if none is installed. Regenerate with `./gradlew updateDaemonJvm --jvm-version=17` (omit `--jvm-vendor` to keep it vendor-neutral).
 - Android SDK with compileSdk/targetSdk 36
 - Min SDK: 23 (Android 6.0)
 - Gradle 9.8.2 (via wrapper, with `distributionSha256Sum` verification)
